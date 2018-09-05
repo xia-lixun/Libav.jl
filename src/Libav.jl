@@ -146,10 +146,11 @@ function wavrgbintense(t, mp4, tsilent, wav)
     # merge new tracks
 
     rgb ./= maximum(rgb)
-    rgbw = zeros(Float32, size(x,1), 3)
+    nx = size(x,1)
+    rgbw = zeros(Float32, nx, 3)
     n = size(rgb,1)
     for i = 1:n
-        rgbw[round(Int, i/30 * convert(Float64, fs)),:] = rgb[i,:]
+        rgbw[max(min(round(Int, i/30 * convert(Float64, fs)), nx),1), :] = rgb[i,:]
     end
     y = [x rgbw]
     Libaudio.wavwrite(y, wav, fs, 32)
