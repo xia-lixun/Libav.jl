@@ -128,7 +128,7 @@ end
 
 
 
-function wavrgbintense(t, mp4, tsilent)
+function wavrgbintense(t, mp4, tsilent, wav)
     
     r = randstring()
     d = r * ".ppm"
@@ -151,8 +151,9 @@ function wavrgbintense(t, mp4, tsilent)
         rgbw[round(Int, i/30 * convert(Float64, fs)),:] = rgb[i,:]
     end
     y = [x rgbw]
-    Libaudio.wavwrite(y, w, fs, 32)
+    Libaudio.wavwrite(y, wav, fs, 32)
     rm(d)
+    rm(w)
     return y
 end
 
