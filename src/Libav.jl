@@ -23,7 +23,7 @@ end
 
 function record(t, mp4="foobar.mp4", s="160x120", f=30, v="Logitech HD Webcam C310", a="Microphone (HD Webcam C310)")
     try
-        run(`ffmpeg.exe -y -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
+        run(`ffmpeg.exe -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
     catch
     end
 end
