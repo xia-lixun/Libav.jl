@@ -117,15 +117,44 @@ function rgbintense(ppm="foobar.ppm", h=480, v=640, fps=30, tsilent::Tuple{<:Rea
         end
         @assert i == n
     end
-
-    open(out * ".dat", "w") do f
-        for j = 1:n
-            write(f, "$(rgb[j,1]), $(rgb[j,2]), $(rgb[j,3])\n")
-        end
-    end
+    # open(out * ".dat", "w") do f
+    #     for j = 1:n
+    #         write(f, "$(rgb[j,1]), $(rgb[j,2]), $(rgb[j,3])\n")
+    #     end
+    # end
     return rgb, out
 end
 
+
+
+
+function wavrgbintense(t, mp4, tsilent)
+    
+    r = randstring()
+    d = r * ".ppm"
+    w = r * ".wav"
+
+    Libav.record(t, mp4)
+    Libav.ripvideo(mp4, d)
+    rgb, out = Libav.rgbintense(d, 160, 120, 30, tsilent)
+    Libav.ripaudio(mp4, w)
+    x,fs = Libaudio.wavread(w)
+
+    # norm rgb to [0,1]
+    # mark x axis of rgb to sound track
+    # merge new tracks
+
+    rgb ./= maximum(rgb)
+    rgbw = zeros(Float32, size(x,1), 3)
+    n = size(rgb,1)
+    for i = 1:n
+        rgbw[round(Int, i/30 * convert(Float64, fs)),:] = rgb[i,:]
+    end
+    y = [x rgbw]
+    Libaudio.wavwrite(y, w, fs, 32)
+    rm(d)
+    return y
+end
 
 
 
