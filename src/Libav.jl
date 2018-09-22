@@ -8,7 +8,8 @@ using Libaudio
 
 function listdevices()
     try
-        run(`ffmpeg -list_devices true -f dshow -i dummy`)
+        Sys.iswindows() && run(`ffmpeg -list_devices true -f dshow -i dummy`)
+        Sys.islinux() && run(`v4l2-ctl --list-devices`)
     catch
     end
 end
@@ -16,7 +17,8 @@ end
 
 function listoptions(device="Logitech HD Webcam C310")
     try
-        run(`ffmpeg -f dshow -list_options true -i video="$(device)"`)
+        Sys.iswindows() && run(`ffmpeg -f dshow -list_options true -i video="$(device)"`)
+        Sys.islinux() && run(`ffmpeg -f v4l2 -list_formats all -i /dev/video0`)
     catch
     end
 end
@@ -24,7 +26,16 @@ end
 
 function record(t, mp4="foobar.mp4", s="160x120", f=30, v="Logitech HD Webcam C310", a="Microphone (HD Webcam C310)")
     try
-        run(`ffmpeg.exe -y -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
+        Sys.iswindows() && run(`ffmpeg.exe -y -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
+        if Sys.islinux()
+            wav = mp4[1:end-3] * "wav"
+            open("capture.sh", "w") do io
+                write(io, "ffmpeg -y -t $t -f alsa -ac 1 -ar 48000 -i hw:1 $wav &\n")
+                write(io, "ffmpeg -y -t $t -f v4l2 -framerate $f -video_size $s -i /dev/video0 $mp4\n")
+            end
+            run(`chmod +x capture.sh`)
+            run(`./capture.sh`)
+        end
     catch
     end
 end
@@ -138,7 +149,7 @@ function wavrgbintense(t, mp4, tsilent, wav)
     Libav.record(t, mp4)
     Libav.ripvideo(mp4, d)
     rgb, out = Libav.rgbintense(d, 160, 120, 30, tsilent)
-    Libav.ripaudio(mp4, w)
+    Sys.iswindows() && Libav.ripaudio(mp4, w)
     x,fs = Libaudio.wavread(w)
 
     # norm rgb to [0,1]
