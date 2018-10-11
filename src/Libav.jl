@@ -1,14 +1,64 @@
 module Libav
+
+import BinDeps
+using Dates
+using SHA
 using Random
 using Libaudio
+
+
+folder() = normpath(joinpath(@__FILE__, "../../deps"))
+
+
+function uninstall()
+    rm(joinpath(folder(), "FFmpeg"), force=true, recursive=true)
+end
+
+
+function isinstalled() 
+    ok = isdir(joinpath(folder(), "FFmpeg"))
+end
+
+download(x) = run(BinDeps.download_cmd(x, basename(x)))
+
+function fetch(url, file, sha256r, app)
+    download("$(url)$(file)")
+    sha256c = open("$file") do io
+        sha256(io)
+    end
+    if isequal(bytes2hex(sha256c), lowercase(sha256r))
+        printstyled("SHA256 ok, extracting...\n", color=:light_cyan)
+        run(`7z x $file -o$app`)
+    else
+        printstyled("SHA256 mismatch, nothing installed, please try again\n", color=:light_red)
+    end
+    rm(file)
+end
+
+
+function install()
+    dir = folder()  
+    !isdir(dir) && mkpath(dir)
+    uninstall()
+    cd(dir) do
+      if Sys.iswindows()
+        # arch = Int == Int64 ? "x64" : "x86"
+        url = "https://ffmpeg.zeranoe.com/builds/win64/static/"
+        file = "ffmpeg-4.0.2-win64-static.zip"
+        sha256r = "2BF3726D7B489F1FE5609E1F9D93D827FD9E9C9D21B829B254A5BAE0C3F60EC8"
+        fetch(url, file, sha256r, "FFmpeg")        
+      end
+    end  
+end
 
 
 
 
 
 function listdevices()
+    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
     try
-        Sys.iswindows() && run(`ffmpeg -list_devices true -f dshow -i dummy`)
+        Sys.iswindows() && run(`$ffmpeg -list_devices true -f dshow -i dummy`)
         Sys.islinux() && run(`v4l2-ctl --list-devices`)
     catch
     end
@@ -16,8 +66,9 @@ end
 
 
 function listoptions(device="Logitech HD Webcam C310")
+    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
     try
-        Sys.iswindows() && run(`ffmpeg -f dshow -list_options true -i video="$(device)"`)
+        Sys.iswindows() && run(`$ffmpeg -f dshow -list_options true -i video="$(device)"`)
         Sys.islinux() && run(`ffmpeg -f v4l2 -list_formats all -i /dev/video0`)
     catch
     end
@@ -25,8 +76,9 @@ end
 
 
 function record(t, mp4="foobar.mp4", s="160x120", f=30, v="Logitech HD Webcam C310", a="Microphone (HD Webcam C310)")
+    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
     try
-        Sys.iswindows() && run(`ffmpeg.exe -y -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
+        Sys.iswindows() && run(`$ffmpeg -y -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
         if Sys.islinux()
             wav = mp4[1:end-3] * "wav"
             open("capture.sh", "w") do io
@@ -42,18 +94,23 @@ end
 
 
 function ripaudio(mp4="foobar.mp4", wav="foobar.wav")
+    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
     try
-        run(`ffmpeg.exe -y -i $mp4 $wav`)
+        run(`$ffmpeg -y -i $mp4 $wav`)
     catch
     end
 end
 
 function ripvideo(mp4="foobar.mp4", ppm="foobar.ppm")
+    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
     try
-        run(`ffmpeg.exe -y -i $mp4 -f image2pipe -vcodec ppm $ppm`)
+        run(`$ffmpeg -y -i $mp4 -f image2pipe -vcodec ppm $ppm`)
     catch
     end
 end
+
+
+
 
 
 #P6
