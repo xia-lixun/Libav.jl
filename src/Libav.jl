@@ -221,7 +221,7 @@ function wavrgbintense(t, mp4, tsilent, wav)
         rgbw[max(min(round(Int, i/30 * convert(Float64, fs)), nx),1), :] = rgb[i,:]
     end
     y = [x rgbw]
-    Libaudio.wavwrite(wav, y, fs, 32)
+    Libaudio.wavwrite(wav, y, fs, 16)
     rm(d)
     rm(w)
     return y
