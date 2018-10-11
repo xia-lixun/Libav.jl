@@ -4,6 +4,9 @@ authors = ["Lixun <lixun.xia@outlook.com>"]
 version = "0.1.0"
 
 [deps]
+BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Libaudio = "492fcaa0-a483-11e8-0aa5-8960d485180b"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
