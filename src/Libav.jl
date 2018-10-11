@@ -56,7 +56,7 @@ end
 
 
 function listdevices()
-    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
+    ffmpeg = joinpath(folder(), "FFmpeg/ffmpeg-4.0.2-win64-static/bin/ffmpeg.exe")
     try
         Sys.iswindows() && run(`$ffmpeg -list_devices true -f dshow -i dummy`)
         Sys.islinux() && run(`v4l2-ctl --list-devices`)
@@ -66,7 +66,7 @@ end
 
 
 function listoptions(device="Logitech HD Webcam C310")
-    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
+    ffmpeg = joinpath(folder(), "FFmpeg/ffmpeg-4.0.2-win64-static/bin/ffmpeg.exe")
     try
         Sys.iswindows() && run(`$ffmpeg -f dshow -list_options true -i video="$(device)"`)
         Sys.islinux() && run(`ffmpeg -f v4l2 -list_formats all -i /dev/video0`)
@@ -76,7 +76,7 @@ end
 
 
 function record(t, mp4="foobar.mp4", s="160x120", f=30, v="Logitech HD Webcam C310", a="Microphone (HD Webcam C310)")
-    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
+    ffmpeg = joinpath(folder(), "FFmpeg/ffmpeg-4.0.2-win64-static/bin/ffmpeg.exe")
     try
         Sys.iswindows() && run(`$ffmpeg -y -f dshow -t $t -video_size $s -framerate $f -pixel_format bgr24 -i video="$v":audio="$a" $mp4`)
         if Sys.islinux()
@@ -94,7 +94,7 @@ end
 
 
 function ripaudio(mp4="foobar.mp4", wav="foobar.wav")
-    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
+    ffmpeg = joinpath(folder(), "FFmpeg/ffmpeg-4.0.2-win64-static/bin/ffmpeg.exe")
     try
         run(`$ffmpeg -y -i $mp4 $wav`)
     catch
@@ -102,7 +102,7 @@ function ripaudio(mp4="foobar.mp4", wav="foobar.wav")
 end
 
 function ripvideo(mp4="foobar.mp4", ppm="foobar.ppm")
-    ffmpeg = joinpath(folder(), "FFmpeg/bin/ffmpeg.exe")
+    ffmpeg = joinpath(folder(), "FFmpeg/ffmpeg-4.0.2-win64-static/bin/ffmpeg.exe")
     try
         run(`$ffmpeg -y -i $mp4 -f image2pipe -vcodec ppm $ppm`)
     catch
